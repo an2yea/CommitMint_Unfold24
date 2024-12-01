@@ -48,13 +48,37 @@ const YourHabits = ({ user, activeTab, setActiveTab }) => {
     }
   }, [statusFilter]);
 
-  const handleCheckIn = async (id) => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    setHabits(habits.map(habit => 
-      habit.id === id ? { ...habit, dailyCheckin: true } : habit
-    ))
+  const handleCheckIn = async (contractId, habitVerifier, username) => {
+  try {
+    const response = await fetch(`/api/verify/${habitVerifier}/${username}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ contractId, username }),
+    });
+
+    const data = await response.json();
+    console.log('Response from verify API:', data);
+
+    if (response.ok) {
+      if(data.doneToday) {
+        console.log('Habit verified successfully');
+        setHabits(habits.map(habit => 
+          habit.id === contractId ? { ...habit, dailyCheckin: true } : habit
+        ));
+      }
+      else{
+        console.log('Habit not verified');
+      }
+
+    } else {
+      console.log('Error verifying habit:', data.error);
+    }
+  } catch (err) {
+    console.log('Error making verify API call:', err);
   }
+};
 
   const handleStartNow = () => {
     setActiveTab("browse-habits")
