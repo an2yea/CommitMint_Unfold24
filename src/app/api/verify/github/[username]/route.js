@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 const GITHUB_API_URL = process.env.GITHUB_API_URL;
 const GITHUB_API_KEY = process.env.GITHUB_API_KEY; // Ensure you set this environment variable
 
-export async function GET(request, { params }) {
+export async function POST(request, { params }) {
   const { username } = await params;
   const today = new Date().toISOString().split('T')[0];
 
@@ -20,16 +20,16 @@ export async function GET(request, { params }) {
     }
 
     const events = await response.json();
-    const commitedToday = events.some(event => {
+    const doneToday = events.some(event => {
       if (event.type === 'PushEvent') {
         return event.created_at.startsWith(today);
       }
       return false;
     });
 
-    return NextResponse.json({ commitedToday });
+    return NextResponse.json({ doneToday });
   } catch (error) {
-    console.error(error);
+    console.log(error);
     return NextResponse.json({ error: 'Failed to verify commit' }, { status: 500 });
   }
 }

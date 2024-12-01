@@ -3,7 +3,7 @@ import {Laptop, Dumbbell, Salad } from 'lucide-react'
 export const browseHabits = [
     {   
         id: 1, 
-        habitVerifier: "Github",
+        habitVerifier: "github",
         icon: Laptop,
         title: "Become a Better Developer!",
         subtitle: "One GitHub commit everyday",
@@ -18,7 +18,7 @@ export const browseHabits = [
      {   
         id: 2, 
         icon: Dumbbell,
-        habitVerifier: "Strava",
+        habitVerifier: "strava",
         title: "Become Fitter!",
         subtitle: "One physical activity everyday!",
         total_stakers: 20,
@@ -32,7 +32,7 @@ export const browseHabits = [
      {   
         id: 3, 
         icon: Laptop,
-        habitVerifier: "Strava",
+        habitVerifier: "strava",
         title: "Become a Better Developer!",
         subtitle: "One GitHub commit everyday",
         total_stakers: 15,

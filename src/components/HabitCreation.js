@@ -177,12 +177,12 @@ export function HabitCreationFlow({ isOpen, onClose, selectedHabit, onHabitCreat
       ),
     },
     {
-      title: `${selectedHabit?.habitVerifier} Username`,
-      description: `Enter your ${selectedHabit?.habitVerifier} username for activity tracking`,
+      title: `${selectedHabit?.habitVerifier.charAt(0).toUpperCase() + selectedHabit?.habitVerifier.slice(1)} Username`,
+      description: `Enter your ${selectedHabit?.habitVerifier.charAt(0).toUpperCase() + selectedHabit?.habitVerifier.slice(1)} username for activity tracking`,
       icon: User,
       content: (
         <div className="space-y-2">
-          <Label htmlFor="username">{`${selectedHabit?.habitVerifier} Username`}</Label>
+          <Label htmlFor="username">{`${selectedHabit?.habitVerifier.charAt(0).toUpperCase() + selectedHabit?.habitVerifier.slice(1)} Username`}</Label>
           <Input
             id="username"
             name="username"

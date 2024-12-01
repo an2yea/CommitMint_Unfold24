@@ -22,7 +22,6 @@ export async function POST(req) {
   const habitContract = {
     contractId,
     userId,
-    habitId,
     habitVerifier,
     username,
     startDate,

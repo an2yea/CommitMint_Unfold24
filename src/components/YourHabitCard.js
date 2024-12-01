@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Check, X, AlertTriangle, DollarSign, Flame, Ticket, PlayCircle, CheckCircle2, XCircle } from 'lucide-react'
+
 
 
 export function YourHabitCard({ habit, onCheckIn }) {
@@ -23,7 +24,7 @@ export function YourHabitCard({ habit, onCheckIn }) {
   const handleCheckIn = async () => {
     setIsChecking(true)
     try {
-      await onCheckIn(habit.id)
+      await onCheckIn(habit.contractId, habit.habitVerifier, habit.username)
       setCheckInSuccess(true)
     } catch (error) {
       console.error('Check-in failed:', error)

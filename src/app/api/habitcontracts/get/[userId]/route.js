@@ -1,6 +1,7 @@
-import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 import { NextResponse } from 'next/server';
 import { db } from '@/config/firebase';
+import { getUserById } from '../../../users/[userId]/route';
 
 export async function GET(req, { params }) {
   const { userId } = await params;
@@ -10,14 +11,7 @@ export async function GET(req, { params }) {
   }
 
   try {
-    const userDocRef = doc(db, 'users', userId);
-    const userDoc = await getDoc(userDocRef);
-
-    if (!userDoc.exists()) {
-      return NextResponse.json({ error: 'User not found' });
-    }
-
-    const userData = userDoc.data();
+    const userData = await getUserById(userId);
     const habitContracts = [];
 
     if (userData.currentHabits && userData.currentHabits.length > 0) {
