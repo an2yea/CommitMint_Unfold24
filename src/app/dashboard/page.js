@@ -4,15 +4,13 @@
 import { useEffect, useState } from 'react';
 import { auth } from '@/config/firebase';
 import { useRouter } from 'next/navigation';
-import { Dialog } from "@/components/ui/dialog"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import {Book, Dumbbell, Salad } from 'lucide-react'
-import YourHabits from './components/YourHabits';
-import ConfirmHabitCreationDialog from './components/ConfirmHabitCreationDialog';
-import BrowseHabits from './components/BrowseHabits';
-import HabitCreationDialog from './components/HabitCreationDialog';
-import DashboardHeader from './components/DashboardHeader';
-import TotalStaked from './components/TotalStaked';
+import YourHabits from '../../components/YourHabits';
+import BrowseHabits from '../../components/BrowseHabits';
+import DashboardHeader from '../../components/DashboardHeader';
+import TotalStaked from '../../components/TotalStaked';
+import { HabitCreationFlow } from '@/components/HabitCreation';
+import { browseHabits } from '@/lib/data';
 
 const userData = {
   name: "Jane Doe",
@@ -24,12 +22,6 @@ const userData = {
     { id: 4, name: "Healthy Eating", streak: 10, goalDays: 30, staked: 75, freePasses: 0, participants: 1800 },
   ]
 }
-
-const browseHabits = [
-  { id: 2, name: "Learn a Language", icon: Book },
-  { id: 3, name: "Strength Training", icon: Dumbbell },
-  { id: 4, name: "Meal Prep Sundays", icon: Salad },
-]
 
 export default function DashboardPage() {
   const [user, setUser] = useState(null);
@@ -98,7 +90,12 @@ export default function DashboardPage() {
         <YourHabits habits={userData.habits} />
         <BrowseHabits habits={browseHabits} selectedHabit={selectedHabit} setSelectedHabit={setSelectedHabit} isCreatingHabit={isCreatingHabit} setIsCreatingHabit={setIsCreatingHabit} onHabitCreationComplete={onHabitCreationComplete} />
       </Tabs>
-
+      <HabitCreationFlow
+      isOpen={selectedHabit !== null}
+      onClose={() => setSelectedHabit(null)}
+      selectedHabit={selectedHabit}
+      onHabitCreationComplete={onHabitCreationComplete}
+      />
     </div>
   )
 }
