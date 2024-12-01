@@ -1,8 +1,8 @@
 import { Dialog,DialogTrigger } from "@/components/ui/dialog";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from 'framer-motion';
 import { TabsContent } from "@/components/ui/tabs";
-import HabitCreationDialog from "./HabitCreationDialog";
+import { Users } from 'lucide-react';
 
 const BrowseHabits = ({ habits, selectedHabit, setSelectedHabit, isCreatingHabit, setIsCreatingHabit, onHabitCreationComplete }) => {
   const handleCardClick = (habit) => {
@@ -12,6 +12,7 @@ const BrowseHabits = ({ habits, selectedHabit, setSelectedHabit, isCreatingHabit
   const handleDialogClose = () => {
     setSelectedHabit(null); // Close the dialog when required
   };
+
   return (
     <TabsContent value="browse-habits">
       <motion.div
@@ -30,21 +31,23 @@ const BrowseHabits = ({ habits, selectedHabit, setSelectedHabit, isCreatingHabit
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <Card className="cursor-pointer" onClick={() => handleCardClick(habit)}>
-                    <CardContent className="flex flex-col items-center justify-center p-6">
-                      <habit.icon className="h-12 w-12 mb-4 text-primary" />
-                      <h3 className="text-lg font-semibold text-center">{habit.name}</h3>
+                  <Card className="cursor-pointer h-full" onClick={() => handleCardClick(habit)}>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-lg">{habit.title}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex flex-col h-full justify-between">
+                        <p className="text-sm text-muted-foreground mb-4">{habit.subtitle}</p>
+                        <div className="flex items-center justify-between mt-auto">
+                          <habit.icon className="h-8 w-8 text-primary" />
+                          <div className="flex items-center text-sm text-muted-foreground">
+                            <Users className="h-4 w-4 mr-1" />
+                            <span>{habit.total_stakers} stakers</span>
+                          </div>
+                        </div>
+                      </div>
                     </CardContent>
                   </Card>
-                 { selectedHabit && (
-                  <Dialog open={selectedHabit !== null} onOpenChange={handleDialogClose}>
-        <HabitCreationDialog selectedHabit={selectedHabit}
-                  onHabitCreationComplete={onHabitCreationComplete}
-                  isCreatingHabit={isCreatingHabit}
-                  setIsCreatingHabit={setIsCreatingHabit} />
-      </Dialog>
-                 )}
-
                 </motion.div>
               </DialogTrigger>
             </Dialog>
