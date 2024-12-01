@@ -3,12 +3,16 @@ import { motion } from 'framer-motion'
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Sparkles, ArrowRight } from 'lucide-react'
+import { useDashboardContext } from '@/context/DashboardContext';
 
-interface EmptyHabitsCTAProps {
-  onStartNow: () => void;
-}
 
-export function EmptyHabitsCTA({ onStartNow }: EmptyHabitsCTAProps) {
+export function EmptyHabitsCTA() {
+    const { setActiveTab } = useDashboardContext();
+
+    const onStartNow = () => {
+        setActiveTab("browse-habits")
+    }
+
     return (
         <div className="flex items-center justify-center min-h-[calc(100vh-16rem)]">
         <motion.div

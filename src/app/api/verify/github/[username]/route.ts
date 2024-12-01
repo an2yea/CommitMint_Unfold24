@@ -1,6 +1,9 @@
 // src/app/api/verify/github/[username]/route.ts
 import { NextResponse } from 'next/server';
 import { NextRequest } from 'next/server';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { format } from 'date-fns';
+import { db } from '@/config/firebase';
 
 // Type for GitHub event
 interface GitHubEvent {
@@ -12,11 +15,12 @@ const GITHUB_API_URL = process.env.GITHUB_API_URL;
 const GITHUB_API_KEY = process.env.GITHUB_API_KEY;
 
 export async function POST(
-  request: NextRequest,
+  req: NextRequest,
   { params }: { params: { username: string } }
 ) {
-  const { username } = params;
-  const today = new Date().toISOString().split('T')[0];
+  const { username } = await params;
+  const { habitContractId } = await req.json();
+  const today = format(new Date(), 'yyyy-MM-dd');
 
   try {
     const response = await fetch(`${GITHUB_API_URL}/users/${username}/events/public`, {
@@ -36,6 +40,27 @@ export async function POST(
       }
       return false;
     });
+
+    if (doneToday) {
+      const contractRef = doc(db, 'habitContracts', habitContractId);
+      const contractSnap = await getDoc(contractRef);
+      console.log("Contract data is", contractSnap.data())
+      if (contractSnap.exists()) {
+        const contract = contractSnap.data();
+        const updatedStreak = contract.progress.streak + 1;
+        const updatedDays = {
+          ...contract.progress.days,
+          [today]: { verified: true }
+        };
+
+        await updateDoc(contractRef, {
+          'progress.streak': updatedStreak,
+          'progress.days': updatedDays,
+          dailyCheckin: true,
+          lastVerifiedDate: today
+        });
+      }
+    }
 
     return NextResponse.json({ doneToday });
   } catch (error) {

@@ -1,5 +1,5 @@
-export * from './habit_contract';
+export * from './habitContract';
 export * from './user';
-export * from './habit_types';
-export * from './create_habit_request';
+export * from './habitTypes';
+export * from './createHabitRequest';
 // Export other type files as needed 

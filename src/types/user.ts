@@ -1,11 +1,11 @@
-import type { HabitContract } from './habit_contract';
+import type { HabitContract } from './habitContract';
 
 export interface User {
   email: string;
   username: string;
   created_at: string;
-  habitContracts: HabitContract[];
-  staked_amount: number;
+  habitContracts: string[];
+  stakedAmount: number;
   avatar: string;
   uid: string;
 } 

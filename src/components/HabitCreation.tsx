@@ -7,18 +7,8 @@ import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
 import { Check, ChevronRight, Calendar, Ticket, DollarSign, User, Loader2 } from 'lucide-react'
 import type { HabitType } from '@/types'
+import { useDashboardContext } from '@/context/DashboardContext';
 
-interface User {
-  uid: string
-}
-
-interface HabitCreationFlowProps {
-  isOpen: boolean
-  onClose: () => void
-  selectedHabit: HabitType | null
-  onHabitCreationComplete: () => void
-  user: User
-}
 
 interface FormData {
   days: number
@@ -27,8 +17,9 @@ interface FormData {
   username: string
 }
 
-export function HabitCreationFlow({ isOpen, onClose, selectedHabit, onHabitCreationComplete, user }: HabitCreationFlowProps) {
+export function HabitCreationFlow() {
   // States
+  const { user, setUser } = useDashboardContext();
   const [step, setStep] = useState<number>(0)
   const [formData, setFormData] = useState<FormData>({
     days: 7,
@@ -36,6 +27,7 @@ export function HabitCreationFlow({ isOpen, onClose, selectedHabit, onHabitCreat
     stake: 10,
     username: '',
   })
+  const { selectedHabit, setActiveTab, setSelectedHabit, setShouldFetchHabits } = useDashboardContext();
   const [isConfirming, setIsConfirming] = useState<boolean>(false)
   const [isSuccess, setIsSuccess] = useState<boolean>(false)
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -97,12 +89,21 @@ export function HabitCreationFlow({ isOpen, onClose, selectedHabit, onHabitCreat
     setIsConfirming(false)
     setIsSuccess(false)
     setError('')
-    onClose()
+    setSelectedHabit(null)
+    setIsLoading(false)
+  }
+
+  const onHabitCreationComplete = () => {
+    setSelectedHabit(null)
+    setIsConfirming(false)
+    setIsSuccess(false)
+    setActiveTab("your-habits")
+    setShouldFetchHabits(true)
   }
 
   const createHabitContract = async (): Promise<void> => {
     const habitContractData = {
-      userId: user.uid,
+      userId: user?.uid,
       habitId: selectedHabit?.id,
       habitVerifier: selectedHabit?.habitVerifier,
       username: formData.username,
@@ -123,6 +124,7 @@ export function HabitCreationFlow({ isOpen, onClose, selectedHabit, onHabitCreat
 
       if (!response.ok) {
         setError('Failed to create habit contract. Please try again.');
+
         setTimeout(() => {
           handleDialogClose()
         }, 3000)
@@ -224,7 +226,7 @@ export function HabitCreationFlow({ isOpen, onClose, selectedHabit, onHabitCreat
   ]
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleDialogClose}>
+    <Dialog open={selectedHabit !== null} onOpenChange={handleDialogClose}>
       <DialogContent className="sm:max-w-[425px]">
         <AnimatePresence mode="wait">
           {!isConfirming && !isLoading && !isSuccess && (
