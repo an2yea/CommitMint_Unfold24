@@ -1,12 +1,65 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Flame, DollarSign, Ticket, Users } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { Progress } from "@/components/ui/progress";
+import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion';
 import { TabsContent } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { YourHabitCard } from "./YourHabitCard";
+import { EmptyHabitsCTA } from './EmptyHabitsCTA';
 
-const YourHabits = ({ habits }) => {
+const YourHabits = ({ user, activeTab, setActiveTab }) => {
+
+  const [statusFilter, setStatusFilter] = useState('All')
+  const [habits, setHabits] = useState([])
+  const [error, setError] = useState(null); // To handle errors
+  const [isLoading, setIsLoading] = useState(true)
+
+    // Fetch habits from the API endpoint
+    useEffect(() => {
+      const fetchHabits = async () => {
+        if (!user?.uid) return;
+    
+        setIsLoading(true);
+        setError(null);
+    
+        try {
+          const response = await fetch(`/api/habitcontracts/get/${user.uid}`);
+    
+          if (!response.ok) {
+            throw new Error('Failed to fetch habits');
+          }
+    
+          const data = await response.json();
+          console.log("Habits are", data)
+          setHabits(data || []); // Assuming the API returns habits in a "habits" array
+        } catch (err) {
+          setError(err.message);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      fetchHabits();
+    }, [user?.uid, activeTab]);
+
+  // Filter habits based on status
+  useEffect(() => {
+    if (statusFilter === 'All') {
+      setHabits((prev) => prev); // No filtering, show all habits
+    } else {
+      setHabits((prev) => prev.filter(habit => habit.status === statusFilter));
+    }
+  }, [statusFilter]);
+
+  const handleCheckIn = async (id) => {
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 2000))
+    setHabits(habits.map(habit => 
+      habit.id === id ? { ...habit, dailyCheckin: true } : habit
+    ))
+  }
+
+  const handleStartNow = () => {
+    setActiveTab("browse-habits")
+  }
+
   return (
     <TabsContent value="your-habits">
       <motion.div
@@ -14,86 +67,44 @@ const YourHabits = ({ habits }) => {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.4, duration: 0.5 }}
       >
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {habits.map((habit, index) => (
-            <Dialog key={habit.id}>
-              <DialogTrigger asChild>
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 * index, duration: 0.5 }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Card className="cursor-pointer">
-                    <CardHeader>
-                      <CardTitle className="flex justify-between items-center">
-                        {habit.name}
-                        <Badge variant="secondary" className="ml-2">
-                          <Flame className="mr-1 h-4 w-4" />
-                          {habit.streak}/{habit.goalDays} days
-                        </Badge>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-2xl font-semibold flex items-center mb-2">
-                        <DollarSign className="mr-1 h-5 w-5" />
-                        {habit.staked.toFixed(2)}
-                      </p>
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm text-muted-foreground">
-                          <span>Progress</span>
-                          <span>{Math.round((habit.streak / habit.goalDays) * 100)}%</span>
-                        </div>
-                        <Progress value={(habit.streak / habit.goalDays) * 100} className="w-full" />
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>{habit.name}</DialogTitle>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="space-y-2">
-                    <h4 className="font-medium leading-none">Streak Progress</h4>
-                    <Progress value={(habit.streak / habit.goalDays) * 100} className="w-full" />
-                    <p className="text-sm text-muted-foreground">{habit.streak} days out of {habit.goalDays} day goal</p>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <Flame className="h-5 w-5 text-orange-500" />
-                    <div className="flex-1 space-y-1">
-                      <p className="text-sm font-medium leading-none">Current Streak</p>
-                      <p className="text-sm text-muted-foreground">{habit.streak} days</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <DollarSign className="h-5 w-5 text-green-500" />
-                    <div className="flex-1 space-y-1">
-                      <p className="text-sm font-medium leading-none">Amount Staked</p>
-                      <p className="text-sm text-muted-foreground">${habit.staked.toFixed(2)}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <Ticket className="h-5 w-5 text-blue-500" />
-                    <div className="flex-1 space-y-1">
-                      <p className="text-sm font-medium leading-none">Free Passes Left</p>
-                      <p className="text-sm text-muted-foreground">{habit.freePasses}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <Users className="h-5 w-5 text-purple-500" />
-                    <div className="flex-1 space-y-1">
-                      <p className="text-sm font-medium leading-none">Current Participants</p>
-                      <p className="text-sm text-muted-foreground">{habit.participants.toLocaleString()}</p>
-                    </div>
-                  </div>
+            {isLoading ? (
+              <div className="flex items-center justify-center h-64">
+                <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            ) : habits.length === 0 ? (
+              <EmptyHabitsCTA onStartNow={handleStartNow} />
+            ) : (
+              <>
+                  <div className="mb-4">
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Filter by status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="All">All Habits</SelectItem>
+                      <SelectItem value="Active">Active</SelectItem>
+                      <SelectItem value="Completed">Completed</SelectItem>
+                      <SelectItem value="Failed">Failed</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-              </DialogContent>
-            </Dialog>
-          ))}
-        </div>
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <AnimatePresence>
+                  {habits.map((habit, index) => (
+                    <motion.div
+                      key={habit.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.5, delay: index * 0.1 }}
+                    >
+                      <YourHabitCard key={habit.id} habit={habit} onCheckIn={handleCheckIn} />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+              </>
+            )}
       </motion.div>
     </TabsContent>
   );

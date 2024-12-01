@@ -8,7 +8,7 @@ import { Slider } from "@/components/ui/slider"
 import { Check, ChevronRight, Calendar, Ticket, DollarSign, User, Loader2 } from 'lucide-react'
 import { set } from 'date-fns'
 
-export function HabitCreationFlow({ isOpen, onClose, selectedHabit, onHabitCreationComplete }) {
+export function HabitCreationFlow({ isOpen, onClose, selectedHabit, onHabitCreationComplete, user }) {
   // States
   const [step, setStep] = useState(0)
   const [formData, setFormData] = useState({
@@ -84,13 +84,15 @@ export function HabitCreationFlow({ isOpen, onClose, selectedHabit, onHabitCreat
 
   const createHabitContract = async () => {
     const habitContractData = {
-      userId: 'currentUserId', // Replace with actual user ID
+      userId: user.uid,
       habitId: selectedHabit?.id,
       habitVerifier: selectedHabit?.habitVerifier,
       username: formData.username,
       days: formData.days,
       freePasses: formData.freePasses,
       stake: formData.stake,
+      habitTitle: selectedHabit.title,
+      habitSubtitle: selectedHabit.subtitle
     };
     try {
       const response = await fetch('/api/habitcontracts/create', {
