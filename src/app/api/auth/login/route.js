@@ -19,6 +19,9 @@ export async function POST(request) {
         displayName: userData.displayName,
         photoURL: userData.photoURL,
         createdAt: new Date().toISOString(),
+        currentHabits: [],
+        completedHabits: [],
+        stakedBalance: 0.00
       });
     }
 
