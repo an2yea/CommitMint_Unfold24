@@ -16,16 +16,23 @@ const userData = {
   name: "Jane Doe",
   avatar: "https://github.com/shadcn.png",
   habits: [
-    { id: 1, name: "Daily Exercise", streak: 7, goalDays: 30, staked: 50, freePasses: 2, participants: 1500 },
-    { id: 2, name: "Meditation", streak: 15, goalDays: 21, staked: 100, freePasses: 1, participants: 2000 },
-    { id: 3, name: "Reading", streak: 5, goalDays: 14, staked: 30, freePasses: 3, participants: 1000 },
-    { id: 4, name: "Healthy Eating", streak: 10, goalDays: 30, staked: 75, freePasses: 0, participants: 1800 },
+    { id: 1, title: "Daily Exercise", subtitle: "30 minutes of cardio", streak: 7, goalDays: 30, staked: 50, freePasses: 2, participants: 1500, status: 'Active', dailyCheckin: false },
+    { id: 2, title: "Meditation", subtitle: "15 minutes of mindfulness", streak: 15, goalDays: 21, staked: 100, freePasses: 1, participants: 2000, status: 'Active', dailyCheckin: true },
+    { id: 3, title: "Reading", subtitle: "Read 20 pages", streak: 5, goalDays: 14, staked: 30, freePasses: 3, participants: 1000, status: 'Failed', dailyCheckin: false },
+    { id: 4, title: "Healthy Eating", subtitle: "No junk food", streak: 10, goalDays: 30, staked: 75, freePasses: 0, participants: 1800, status: 'Completed', dailyCheckin: true },
   ]
 }
 
 export default function DashboardPage() {
   const [user, setUser] = useState(null);
   const router = useRouter();
+
+
+  const [mounted, setMounted] = useState(false)
+  const [activeTab, setActiveTab] = useState("your-habits")
+  const [selectedHabit, setSelectedHabit] = useState(null)
+  const [isCreatingHabit, setIsCreatingHabit] = useState(false)
+
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -54,10 +61,6 @@ export default function DashboardPage() {
     setIsCreatingHabit(false);
   };
 
-  const [mounted, setMounted] = useState(false)
-  const [activeTab, setActiveTab] = useState("your-habits")
-  const [selectedHabit, setSelectedHabit] = useState(null)
-  const [isCreatingHabit, setIsCreatingHabit] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -87,7 +90,7 @@ export default function DashboardPage() {
           <TabsTrigger value="browse-habits">Browse Habits</TabsTrigger>
         </TabsList>
 
-        <YourHabits habits={userData.habits} />
+        <YourHabits  user = {user} activeTab = {activeTab} setActiveTab={setActiveTab}/>
         <BrowseHabits habits={browseHabits} selectedHabit={selectedHabit} setSelectedHabit={setSelectedHabit} isCreatingHabit={isCreatingHabit} setIsCreatingHabit={setIsCreatingHabit} onHabitCreationComplete={onHabitCreationComplete} />
       </Tabs>
       <HabitCreationFlow
@@ -95,6 +98,7 @@ export default function DashboardPage() {
       onClose={() => setSelectedHabit(null)}
       selectedHabit={selectedHabit}
       onHabitCreationComplete={onHabitCreationComplete}
+      user={user}
       />
     </div>
   )
