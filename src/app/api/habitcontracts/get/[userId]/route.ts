@@ -1,22 +1,24 @@
 import { collection, doc, getDoc } from 'firebase/firestore';
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/config/firebase';
-import { getUserById } from '../../../users/[userId]/route';
 import { User, HabitContract } from '@/types';
 
 
 export async function GET(
   req: NextRequest, 
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
-  const { userId } = await params;
+  const  userId  = (await params).userId;
 
   if (!userId) {
     return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
   }
 
   try {
-    const response = await getUserById(userId);
+    const userUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/api/users/${userId}`;
+    const response = await fetch(userUrl, {
+      method: 'GET',
+    });
     const userData = await response.json() as User;
     const habitContracts: ({ id: string } & HabitContract)[] = [];
 

@@ -16,7 +16,7 @@ import { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription, Toas
 import { useDashboardContext } from '@/context/DashboardContext';
 
 function DashboardContent() {
-  const { shouldFetchHabits,user, activeTab, error, setActiveTab, setUser, setError } = useDashboardContext();
+  const { shouldFetchHabits, user, activeTab, error, setActiveTab, setUser, setError } = useDashboardContext();
   const [firebaseUser, setFirebaseUser] = useState<any | null>(null);
   const router = useRouter();
 

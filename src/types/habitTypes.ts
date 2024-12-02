@@ -1,4 +1,5 @@
 import { LucideIcon } from 'lucide-react';
+import type { NFT } from './nfts';
 
 interface VerificationDetails{
     apiUrl: string
@@ -15,6 +16,7 @@ interface HabitType {
     verificationType: string
     verificationDetails: VerificationDetails
     habitVerifier: string
+    nft: NFT
 }
 
 

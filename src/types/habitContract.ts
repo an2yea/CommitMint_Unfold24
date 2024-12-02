@@ -1,3 +1,5 @@
+import type { NFT } from './nfts';
+
 export type HabitStatus = 'Active' | 'Failed' | 'Completed';
 
 interface DayProgress {
@@ -29,6 +31,7 @@ interface HabitContract {
   usedPasses: number;
   createdAt: string;
   lastVerifiedDate: string;
+  nft: NFT;
 }
 
 export type { HabitContract };

@@ -16,9 +16,9 @@ const GITHUB_API_KEY = process.env.GITHUB_API_KEY;
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { username: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
-  const { username } = await params;
+  const username  = (await params).userId
   const { habitContractId } = await req.json();
   const today = format(new Date(), 'yyyy-MM-dd');
 
@@ -75,9 +75,10 @@ export async function POST(
           const userSnap = await getDoc(userRef);
           if (userSnap.exists()) {
             const user = userSnap.data();
-            const updatedStakedAmount = user.stakedAmount - contract.stakeAmount;
             await updateDoc(userRef, {
-              stakedAmount: updatedStakedAmount
+              stakedAmount: user.stakedAmount - contract.stakedAmount,
+              nfts: (user.nfts || []).concat(contract.nft),
+              tokenBalance: user.tokenBalance + contract.stakedAmount
             });
           }
         }

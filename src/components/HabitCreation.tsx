@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
-import { Check, ChevronRight, Calendar, Ticket, DollarSign, User, Loader2 } from 'lucide-react'
+import { Check, ChevronRight, Calendar, Ticket, Coins, User, Loader2 } from 'lucide-react'
 import type { HabitType } from '@/types'
 import { useDashboardContext } from '@/context/DashboardContext';
 
@@ -35,6 +35,18 @@ export function HabitCreationFlow() {
   // handlers
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
+    if (name === 'stake') {
+      const stakeAmount = parseFloat(value)
+      if (stakeAmount < 0) {
+        setError('Stake amount cannot be negative')
+        return
+      }
+      if (stakeAmount > (user?.tokenBalance ?? 0)) {
+        setError(`Stake amount cannot exceed your balance of ${user?.tokenBalance} tokens`)
+      } else {
+        setError('')
+      }
+    }
     setFormData(prev => ({ ...prev, [name]: value }))
     if (name === 'username' && value.trim() !== '') {
       setError('')
@@ -45,10 +57,23 @@ export function HabitCreationFlow() {
     setFormData(prev => ({ ...prev, [name]: value[0] }))
   }
 
-  const handleNext = () => {
-    if (step == 3 && formData.username.trim() === '') {
-      setError(`${selectedHabit?.habitVerifier} username is required to verify your activity!`)
-      return
+  const handleActivityStepNext = () => {
+    if (step === 3) {
+      if (formData.username.trim() === '') {
+        setError(`${selectedHabit?.habitVerifier} username is required to verify your activity!`)
+        return
+      }
+    }
+    if (step === 2) {
+      const stakeAmount = parseFloat(formData.stake.toString())
+      if (isNaN(stakeAmount) || stakeAmount <= 0) {
+        setError('Please enter a valid positive stake amount')
+        return
+      }
+      if (stakeAmount > (user?.tokenBalance ?? 0)) {
+        setError(`Stake amount cannot exceed your balance of ${user?.tokenBalance} tokens`)
+        return
+      }
     }
     if (step < 3) {
       setStep(prev => prev + 1)
@@ -110,7 +135,8 @@ export function HabitCreationFlow() {
       freePasses: formData.freePasses,
       stake: formData.stake,
       title: selectedHabit?.title,
-      subtitle: selectedHabit?.subtitle
+      subtitle: selectedHabit?.subtitle,
+      nft: selectedHabit?.nft
     };
     try {
       const response = await fetch('/api/habitcontracts/create', {
@@ -184,7 +210,7 @@ export function HabitCreationFlow() {
     {
       title: "Stake Amount",
       description: "How much do you want to stake?",
-      icon: DollarSign,
+      icon: Coins,
       content: (
         <div className="space-y-2">
           <Label htmlFor="stake">Stake Amount ($)</Label>
@@ -193,11 +219,16 @@ export function HabitCreationFlow() {
             name="stake"
             type="number"
             min={1}
+            max={user?.tokenBalance}
             step={0.01}
             value={formData.stake}
             onChange={handleInputChange}
             className="text-lg"
           />
+          <p className="text-sm text-muted-foreground">
+            Available Balance: {user?.tokenBalance} tokens
+          </p>
+          {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
         </div>
       ),
     },
@@ -240,15 +271,14 @@ export function HabitCreationFlow() {
                 <DialogDescription>{selectedHabit?.subtitle}</DialogDescription>
               </DialogHeader>
               <div className="mt-4 mb-4">
-              <div className="relative flex justify-between mb-4">
+                <div className="relative flex justify-between mb-4">
                   <div className="absolute top-1/2 left-0 right-0 h-1 bg-secondary -translate-y-1/2" />
                   <div className="absolute top-1/2 left-0 h-1 bg-primary -translate-y-1/2 transition-all duration-300 ease-in-out" style={{ width: `${(step / (steps.length - 1)) * 100}%` }} />
-                {steps.map((_, index) => (
+                  {steps.map((_, index) => (
                     <div key={index} className="z-10">
                       <div
-                        className={`w-6 h-6 rounded-full ${
-                          index <= step ? 'bg-primary' : 'bg-secondary'
-                        } flex items-center justify-center transition-all duration-300 ease-in-out`}
+                        className={`w-6 h-6 rounded-full ${index <= step ? 'bg-primary' : 'bg-secondary'
+                          } flex items-center justify-center transition-all duration-300 ease-in-out`}
                       >
                         {index < step && (
                           <Check className="w-4 h-4 text-primary-foreground" />
@@ -268,7 +298,7 @@ export function HabitCreationFlow() {
                 <Button variant="outline" onClick={handleBack} disabled={step === 0}>
                   Back
                 </Button>
-                <Button onClick={handleNext}>
+                <Button onClick={handleActivityStepNext}>
                   {step < 3 ? 'Next' : 'Review'} <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </DialogFooter>
@@ -316,23 +346,23 @@ export function HabitCreationFlow() {
             </motion.div>
           )}
 
-            {isLoading && (
-              <motion.div
-                key="loading"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                transition={{ duration: 0.5, type: 'spring' }}
-                className="flex flex-col items-center justify-center h-64"
-              >
-                <Loader2 className="w-16 h-16 text-primary animate-spin mb-4" />
-                <h2 className="text-2xl font-bold mb-2">Creating Habit Contract</h2>
-                <p className="text-center text-muted-foreground">
-                  Please wait while we set up your new habit...
-                </p>
-              </motion.div>
-            )}
-          
+          {isLoading && (
+            <motion.div
+              key="loading"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{ duration: 0.5, type: 'spring' }}
+              className="flex flex-col items-center justify-center h-64"
+            >
+              <Loader2 className="w-16 h-16 text-primary animate-spin mb-4" />
+              <h2 className="text-2xl font-bold mb-2">Creating Habit Contract</h2>
+              <p className="text-center text-muted-foreground">
+                Please wait while we set up your new habit...
+              </p>
+            </motion.div>
+          )}
+
           {isSuccess && (
             <motion.div
               key="success"
