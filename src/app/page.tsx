@@ -7,7 +7,7 @@ export default function HomePage(): JSX.Element | null {
   const router = useRouter();
 
   useEffect(() => {
-    router.push('/login');
+    router.push('/home');
   }, [router]);
 
   return null;

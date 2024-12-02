@@ -8,5 +8,4 @@ export interface User {
   stakedAmount: number;
   avatar: string;
   uid: string;
-  walletAddress: string | null;
 } 

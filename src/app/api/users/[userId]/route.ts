@@ -1,8 +1,8 @@
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, DocumentData } from 'firebase/firestore';
 import { NextResponse } from 'next/server';
 import { db } from '@/config/firebase';
 
-export async function getUserById(userId: string): Promise<NextResponse> {
+export async function getUserById(userId: string): Promise<DocumentData> {
   if (!userId) {
     return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
   }
@@ -13,28 +13,7 @@ export async function getUserById(userId: string): Promise<NextResponse> {
   if (!userDoc.exists()) {
     return NextResponse.json({ error: 'User not found' }, { status: 404 });
   }
-  return NextResponse.json(userDoc.data(), { status: 200 });
-}
-
-export async function updateUserWalletAddress(userId: string, walletAddress: string): Promise<NextResponse> {
-  if (!userId || !walletAddress) {
-    return NextResponse.json({ error: 'Missing userId or walletAddress' }, { status: 400 });
-  }
-
-  const userDocRef = doc(db, 'users', userId);
-  try {
-    const userDoc = await getDoc(userDocRef);
-    if (!userDoc.exists()) {
-    console.log("User not found", userId)
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
-    await updateDoc(userDocRef, { walletAddress });
-    console.log("Wallet address updated successfully", userId)
-    return NextResponse.json({ message: 'Wallet address updated successfully' }, { status: 200 });
-  } catch (error) {
-    console.error('Error updating wallet address:', error);
-    return NextResponse.json({ error: 'Failed to update wallet address' }, { status: 500 });
-  }
+  return userDoc.data();
 }
 
 export async function GET(
@@ -43,18 +22,11 @@ export async function GET(
 ) {
   const { userId } = await params;
 
-  const response = await getUserById(userId);
-  return response;
-}
-
-export async function PUT(
-  req: Request,
-  { params }: { params: { userId: string } }
-) {
-  const { userId } = await params;
-  const { walletAddress } = await req.json();
-
-  const response = await updateUserWalletAddress(userId, walletAddress);
-  return response;
-  
+  try {
+    const userData = await getUserById(userId);
+    return NextResponse.json(userData);
+  } catch (error) {
+    console.error('Error fetching user details:', error);
+    return NextResponse.json({ error: 'Failed to fetch user details' }, { status: 500 });
+  }
 }

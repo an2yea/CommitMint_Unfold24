@@ -12,11 +12,9 @@ import { FcGoogle } from 'react-icons/fc';
 import Link from 'next/link';
 import { GoogleAuthProvider, signInWithPopup, UserCredential } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
-import { useOkto, OktoContextType } from 'okto-sdk-react';
 
 export default function LoginPage(): JSX.Element {
   const [loading, setLoading] = useState<boolean>(false);
-  const { authenticate } = useOkto() as OktoContextType;
   const router = useRouter();
 
   const handleGoogleLogin = async (event: React.FormEvent): Promise<void> => {
@@ -25,25 +23,7 @@ export default function LoginPage(): JSX.Element {
     const provider = new GoogleAuthProvider();
     try {
       const result: UserCredential = await signInWithPopup(auth, provider);
-
-      const credential = GoogleAuthProvider.credentialFromResult(result);
-      
-
-      try {
-        const idToken = credential?.idToken;
-        await authenticate(idToken as string, async (authResponse: any, error: any) => {
-        if (authResponse) {
-          console.log("Authentication successful", authResponse);
-        } else if (error) {
-          console.error("Error authenticating with Okto", error);
-        } 
-        });
-
-      } catch (error) {
-        console.error("Error getting user ID token", error);
-      }
-
-
+      // Send only necessary user data to your API
       await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

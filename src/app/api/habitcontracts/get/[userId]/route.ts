@@ -16,8 +16,7 @@ export async function GET(
   }
 
   try {
-    const response = await getUserById(userId);
-    const userData = await response.json() as User;
+    const userData = await getUserById(userId) as User;
     const habitContracts: ({ id: string } & HabitContract)[] = [];
 
 
