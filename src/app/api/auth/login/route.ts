@@ -32,6 +32,8 @@ export async function POST(request: Request): Promise<NextResponse> {
         stakedAmount: 0.00,
         avatar: userData.photoURL ?? '',
         walletAddress: userData.walletAddress ?? '',
+        nfts: [],
+        tokenBalance: 500
       };
       
       await setDoc(userDoc, newUserData);

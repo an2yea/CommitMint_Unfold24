@@ -1,3 +1,5 @@
+import type { NFT } from './nfts';
+
 interface CreateHabitContractRequest {
     userId: string;
     habitId: string;
@@ -8,6 +10,7 @@ interface CreateHabitContractRequest {
     stake: number;
     title: string;
     subtitle: string;
+    nft: NFT;
   }
 
 export default CreateHabitContractRequest;

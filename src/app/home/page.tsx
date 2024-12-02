@@ -59,7 +59,7 @@ export default function LandingPage() {
 
       <footer className="bg-background text-foreground py-4 border-t">
         <div className="container mx-auto px-6 flex justify-between items-center">
-          <p>&copy; 2023 CommitMint. All rights reserved.</p>
+          <p>&copy; 2024 CommitMint. All rights reserved.</p>
           <div className="flex items-center space-x-2">
             <span>Made with </span>
             <Heart className="w-4 h-4 text-red-500 fill-current" />

@@ -1,7 +1,7 @@
 import { db } from '@/config/firebase';
 import { NextResponse } from 'next/server';
 import { NextRequest } from 'next/server';
-import { collection, getDocs, query, where, doc, updateDoc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, updateDoc, getDoc, arrayUnion } from 'firebase/firestore';
 import { HabitContract } from '@/types'; // Adjust the import based on your project structure
 import { format } from 'date-fns';
 
@@ -10,9 +10,9 @@ export async function POST (req: NextRequest){
     const habitContractsRef = collection(db, 'habitContracts');
     const activeContractsQuery = query(habitContractsRef, where('status', '==', 'Active'));
     const activeContractsSnapshot = await getDocs(activeContractsQuery);
-  
+
     const today = format(new Date(), 'yyyy-MM-dd');
-  
+
     for (const contractDoc of activeContractsSnapshot.docs) {
       const contract = contractDoc.data() as HabitContract;
       const verifyUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/api/verify/${contract.habitVerifier}/${contract.username}`;
@@ -23,9 +23,9 @@ export async function POST (req: NextRequest){
         },
         body: JSON.stringify({ habitContractId: contractDoc.id }),
       });
-  
-      const verificationResult = await response.json();  
-  
+
+      const verificationResult = await response.json();
+
       if (!verificationResult.doneToday) {
         // Freepasses exhausted
         if (contract.freePassesAllowed - contract.usedPasses <= 0) {
@@ -65,7 +65,9 @@ export async function POST (req: NextRequest){
             if (userSnap.exists()) {
               const user = userSnap.data();
               await updateDoc(userRef, {
-                stakedAmount: user.stakedAmount - contract.stakedAmount
+                stakedAmount: user.stakedAmount - contract.stakedAmount,
+                nfts: (user.nfts || []).concat(contract.nft),
+                tokenBalance: user.tokenBalance + contract.stakedAmount
               });
             }
           }
