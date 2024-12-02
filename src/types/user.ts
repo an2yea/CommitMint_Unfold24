@@ -1,4 +1,4 @@
-import type { HabitContract } from './habitContract';
+import type { NFT } from './nfts';
 
 export interface User {
   email: string;
@@ -8,4 +8,7 @@ export interface User {
   stakedAmount: number;
   avatar: string;
   uid: string;
+  walletAddress: string | null;
+  tokenBalance: number;
+  nfts: NFT[];
 } 

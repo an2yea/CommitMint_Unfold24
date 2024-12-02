@@ -13,10 +13,10 @@ import TotalStaked from '../../components/TotalStaked';
 import { X } from 'lucide-react'
 import { HabitCreationFlow } from '@/components/HabitCreation';
 import { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription, ToastClose } from "@/components/ui/toast";
-import { useDashboardContext, DashboardProvider } from '@/context/DashboardContext';
+import { useDashboardContext } from '@/context/DashboardContext';
 
 function DashboardContent() {
-  const { shouldFetchHabits,user, activeTab, error, setActiveTab, setUser, setError } = useDashboardContext();
+  const { shouldFetchHabits, user, activeTab, error, setActiveTab, setUser, setError } = useDashboardContext();
   const [firebaseUser, setFirebaseUser] = useState<any | null>(null);
   const router = useRouter();
 
@@ -62,21 +62,11 @@ function DashboardContent() {
         setUser(data);         
       } catch (err : any) {
         setError(err?.message);
-      } finally {
       }
     };
     fetchUser();
   }, [firebaseUser?.uid, shouldFetchHabits]);
 
-  const handleSignOut = async () => {
-    try {
-      await auth.signOut();
-      await fetch('/api/auth/logout', { method: 'POST' });
-      router.push('/login');
-    } catch (error:any) {
-      setError(`Failed to sign out: ${error?.message}`);
-    }
-  };
 
   const handleCloseError = () => {
     setError(null)
@@ -97,7 +87,7 @@ function DashboardContent() {
     <ToastProvider>
     <div className="min-h-screen bg-background text-foreground p-8">
 
-      <DashboardHeader handleSignOut={handleSignOut} />
+      <DashboardHeader />
 
       <TotalStaked />
 
@@ -141,8 +131,6 @@ function DashboardContent() {
 
 export default function DashboardPage(): JSX.Element {
   return (
-    <DashboardProvider>
       <DashboardContent />
-    </DashboardProvider>
   );
 }

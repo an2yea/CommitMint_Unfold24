@@ -16,6 +16,12 @@ export const browseHabits: HabitType[] = [
             params: ["username"],
             frequency: "daily"
         },
+        nft: {
+            id: "1",
+            name: "Developer NFT",
+            description: "A NFT for the best developers",
+            image: "/images/developer.png"
+        }
      },
      {   
         id: 2, 
@@ -30,6 +36,12 @@ export const browseHabits: HabitType[] = [
             params: ["username"],
             frequency: "daily"
         },
+        nft: {
+            id: "2",
+            name: "Fitness NFT",
+            description: "A NFT for fitness pros",
+            image: "/images/fit.png"
+        }
      },
      {   
         id: 3, 
@@ -44,7 +56,14 @@ export const browseHabits: HabitType[] = [
             params: ["username"],
             frequency: "daily"
         },
+        nft: {
+            id: "3",
+            name: "Developer NFT",
+            description: "A NFT for developers",
+            image: "/images/random.png"
+        }
      },
+
   ]
 
 

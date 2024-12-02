@@ -110,7 +110,8 @@ export function HabitCreationFlow() {
       freePasses: formData.freePasses,
       stake: formData.stake,
       title: selectedHabit?.title,
-      subtitle: selectedHabit?.subtitle
+      subtitle: selectedHabit?.subtitle,
+      nft: selectedHabit?.nft
     };
     try {
       const response = await fetch('/api/habitcontracts/create', {

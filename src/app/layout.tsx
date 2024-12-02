@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import { ThemeProvider } from "@/components/theme-provider"
 import "../styles/globals.css";
 import React from 'react';
+import { DashboardProvider } from '@/context/DashboardContext';
 
 const inter = Inter({ subsets: ['latin'] })
 const geistSans = localFont({
@@ -29,9 +30,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <DashboardProvider>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           {children}
         </ThemeProvider>
+        </DashboardProvider>
       </body>
     </html>
   );

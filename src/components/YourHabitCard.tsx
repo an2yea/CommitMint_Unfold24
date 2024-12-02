@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Check, X, AlertTriangle, DollarSign, Flame, Ticket, PlayCircle, CheckCircle2, XCircle } from 'lucide-react'
 import { FetchedHabitContract } from '@/types/fetchedHabitContract'
 import { Congratulations } from './Congratulations'
+import { Failure } from './Failure'
 
 interface YourHabitCardProps {
   habit: FetchedHabitContract;
@@ -58,13 +59,23 @@ export function YourHabitCard({ habit, onCheckIn }: YourHabitCardProps) {
     }
   }
 
+  const handleCardClick = () => {
+    if (habit.status === 'Completed') {
+      setShowCongratulations(true);
+    } else if (habit.status === 'Failed') {
+      setIsDialogOpen(true); // Open failure dialog
+    } else if (habit.status === 'Active') {
+      setIsDialogOpen(true); // Open detail dialog
+    }
+  }
+
   return (
     <>
       <motion.div
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         className="cursor-pointer"
-        onClick={() => setIsDialogOpen(true)}
+        onClick={handleCardClick}
       >
         <Card className={`overflow-hidden`}>
           <CardHeader className="pb-2">
@@ -119,67 +130,78 @@ export function YourHabitCard({ habit, onCheckIn }: YourHabitCardProps) {
         </Card>
       </motion.div>
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{habit.title}</DialogTitle>
-            <DialogDescription>{habit.subtitle}</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <h4 className="font-medium">Streak Progress</h4>
-              <Progress value={progress} className="w-full" />
-              <p className="text-sm text-muted-foreground">
-                {habit.progress.streak} days out of {habit.duration} day goal
-              </p>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="font-medium">Amount Staked:</span>
-              <span>${habit.stakedAmount}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="font-medium">Free Passes Left:</span>
-              <span className="flex items-center">
-                <Ticket className="w-4 h-4 mr-1" />
-                {habit.freePassesAllowed - habit.usedPasses}
-              </span>
-            </div>
-            {!habit.dailyCheckin && !checkInSuccess && !checkInFailed && (
-              <Button onClick={handleCheckIn} disabled={isCheckinLoading} className="w-full">
-                {isCheckinLoading ? 'Verifying...' : 'Check-in Daily Activity'}
-              </Button>
-            )}
-            {(habit.dailyCheckin || checkInSuccess) && (
+      { habit.status === 'Active' && (
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{habit.title}</DialogTitle>
+              <DialogDescription>{habit.subtitle}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <h4 className="font-medium">Streak Progress</h4>
+                <Progress value={progress} className="w-full" />
+                <p className="text-sm text-muted-foreground">
+                  {habit.progress.streak} days out of {habit.duration} day goal
+                </p>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="font-medium">Amount Staked:</span>
+                <span>${habit.stakedAmount}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="font-medium">Free Passes Left:</span>
+                <span className="flex items-center">
+                  <Ticket className="w-4 h-4 mr-1" />
+                  {habit.freePassesAllowed - habit.usedPasses} / {habit.freePassesAllowed}
+                </span>
+              </div>
+              {!habit.dailyCheckin && !checkInSuccess && !checkInFailed && (
+                <Button onClick={handleCheckIn} disabled={isCheckinLoading} className="w-full">
+                  {isCheckinLoading ? 'Verifying...' : 'Check-in Daily Activity'}
+                </Button>
+              )}
+              {(habit.dailyCheckin || checkInSuccess) && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="bg-primary/10 text-primary p-3 rounded-md flex items-center justify-center"
+                  >
+                    <Check className="w-5 h-5 mr-2" />
+                    <span>Daily check-in completed!</span>
+                  </motion.div>
+              )}
+              {(checkInFailed) && (
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                  className="bg-primary/10 text-primary p-3 rounded-md flex items-center justify-center"
-                >
-                  <Check className="w-5 h-5 mr-2" />
-                  <span>Daily check-in completed!</span>
-                </motion.div>
-            )}
-            {(checkInFailed) && (
-              <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="bg-primary/10 text-primary p-3 rounded-md flex items-center justify-center"
-            >
-              <X className="w-5 h-5 mr-2" />
-              <span>Daily check-in failed! Failed to verify your activity, please try again!</span>
-            </motion.div>
-            ) }
-          </div>
-        </DialogContent>
-      </Dialog>
-      <Congratulations
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="bg-primary/10 text-primary p-3 rounded-md flex items-center justify-center"
+              >
+                <X className="w-5 h-5 mr-2" />
+                <span>Daily check-in failed! Failed to verify your activity, please try again!</span>
+              </motion.div>
+              ) }
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
+      {habit.status === 'Completed' && (
+        <Congratulations
           isOpen={showCongratulations}
           onClose={() => setShowCongratulations(false)}
           habitTitle={habit.title}
           reward={habit.stakedAmount}
         />
+      )}
+      {habit.status === 'Failed' && (
+        <Failure
+          isOpen={isDialogOpen}
+          onClose={() => setIsDialogOpen(false)}
+          habitTitle={habit.title}
+        />
+      )}
     </>
   )
 }

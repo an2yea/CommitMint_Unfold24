@@ -9,6 +9,7 @@ interface UserData {
   email: string | null;
   displayName: string | null;
   photoURL: string | null;
+  walletAddress: string | null;
 }
 
 
@@ -29,7 +30,10 @@ export async function POST(request: Request): Promise<NextResponse> {
         created_at: new Date().toISOString(),
         habitContracts: [],
         stakedAmount: 0.00,
-        avatar: userData.photoURL ?? ''
+        avatar: userData.photoURL ?? '',
+        walletAddress: userData.walletAddress ?? '',
+        nfts: [],
+        tokenBalance: 500
       };
       
       await setDoc(userDoc, newUserData);

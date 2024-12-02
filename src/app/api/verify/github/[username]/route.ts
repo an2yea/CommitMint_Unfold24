@@ -41,9 +41,16 @@ export async function POST(
       return false;
     });
     let habitCompleted = false;
+    const contractRef = doc(db, 'habitContracts', habitContractId);
+    const contractSnap = await getDoc(contractRef);
+    if (contractSnap.exists()){
+      const contract = contractSnap.data();
+      // If checkin for today is done, don't check again, just return true for done today!
+      if(contract.dailyCheckin){
+        return NextResponse.json({ doneToday : true, habitCompleted });
+      }
+    }
     if (doneToday) {
-      const contractRef = doc(db, 'habitContracts', habitContractId);
-      const contractSnap = await getDoc(contractRef);
       console.log("Contract data is", contractSnap.data())
       if (contractSnap.exists()) {
         const contract = contractSnap.data();
@@ -68,9 +75,10 @@ export async function POST(
           const userSnap = await getDoc(userRef);
           if (userSnap.exists()) {
             const user = userSnap.data();
-            const updatedStakedAmount = user.stakedAmount - contract.stakeAmount;
             await updateDoc(userRef, {
-              stakedAmount: updatedStakedAmount
+              stakedAmount: user.stakedAmount - contract.stakedAmount,
+              nfts: (user.nfts || []).concat(contract.nft),
+              tokenBalance: user.tokenBalance + contract.stakedAmount
             });
           }
         }
