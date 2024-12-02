@@ -16,9 +16,9 @@ const GITHUB_API_KEY = process.env.GITHUB_API_KEY;
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { username: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
-  const { username } = await params;
+  const username  = (await params).userId
   const { habitContractId } = await req.json();
   const today = format(new Date(), 'yyyy-MM-dd');
 

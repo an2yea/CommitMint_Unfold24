@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // Adjust imports as necessary
-import { ImageIcon, DollarSign } from 'lucide-react'; // 
+import { ImageIcon, Coins } from 'lucide-react'; // 
 import { useDashboardContext } from '@/context/DashboardContext';
 import { NFTModal } from './NFTModal';
 const TotalStaked = () => {
@@ -19,7 +19,7 @@ const TotalStaked = () => {
                 <div>
                   <h2 className="text-lg font-semibold mb-2">Total Staked</h2>
                   <p className="text-4xl font-bold flex items-center">
-                    <DollarSign className="mr-2" />
+                    <Coins className="mr-2" />
                     {user?.stakedAmount || 0}
                   </p>
                 </div>

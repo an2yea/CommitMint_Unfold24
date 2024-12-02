@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Trophy, DollarSign, X } from 'lucide-react'
+import { Trophy, Coins, X } from 'lucide-react'
 
 interface CongratulationsProps {
   isOpen: boolean
@@ -33,7 +33,7 @@ export function Congratulations({ isOpen, onClose, habitTitle, reward }: Congrat
                 You've successfully completed <span className="font-semibold">{habitTitle}</span>!
               </p>
               <div className="flex items-center justify-center text-2xl font-bold text-primary mb-4">
-                <DollarSign className="w-8 h-8 mr-2" />
+                <Coins className="w-8 h-8 mr-2" />
                 <span>{reward.toFixed(2)}</span>
               </div>
               <p className="text-sm text-muted-foreground">

@@ -1,4 +1,4 @@
-import {Laptop, Dumbbell, Salad } from 'lucide-react'
+import {Laptop, Dumbbell, Salad, Camera, Brain} from 'lucide-react'
 import type { HabitType } from '@/types';
 
 
@@ -7,8 +7,8 @@ export const browseHabits: HabitType[] = [
         id: 1, 
         habitVerifier: "github",
         icon: Laptop,
-        title: "Become a Better Developer!",
-        subtitle: "One GitHub commit everyday",
+        title: "Level Up Your Coding Skills!",
+        subtitle: "Commit to growth—make one GitHub contribution daily.",
         totalStakers: 15,
         verificationType: "api",
         verificationDetails: {
@@ -27,8 +27,8 @@ export const browseHabits: HabitType[] = [
         id: 2, 
         icon: Dumbbell,
         habitVerifier: "strava",
-        title: "Become Fitter!",
-        subtitle: "One physical activity everyday!",
+        title: "Get Stronger Every Day!",
+        subtitle: "One physical activity to keep you fitter, stronger, and energized.",
         totalStakers: 20,
         verificationType: "api",
         verificationDetails: {
@@ -46,13 +46,13 @@ export const browseHabits: HabitType[] = [
      {   
         id: 3, 
         icon: Laptop,
-        habitVerifier: "strava",
-        title: "Become a Better Developer!",
-        subtitle: "One GitHub commit everyday",
+        habitVerifier: "leetcode",
+        title: "Sharpen Your Problem-Solving Skills!",
+        subtitle: "Ace one LeetCode problem every single day.",
         totalStakers: 15,
         verificationType: "api",
         verificationDetails: {
-            apiUrl: "/api/verify/github/",
+            apiUrl: "/api/verify/leetcode/",
             params: ["username"],
             frequency: "daily"
         },
@@ -63,22 +63,44 @@ export const browseHabits: HabitType[] = [
             image: "/images/random.png"
         }
      },
-
+     {
+        id: 4,
+        icon: Camera,
+        habitVerifier: "youtube",
+        title: "Create and Inspire!",
+        subtitle: "Release one YouTube video every week and grow your audience.",
+        totalStakers: 23,
+        verificationType: "api",
+        verificationDetails: {
+            apiUrl: "/api/verify/youtube/",
+            params: ["username"],
+            frequency: "weekly"
+        },
+        nft: {
+            id: "4",
+            name: "Content Creator NFT",
+            description: "A NFT for content creators",
+            image: "/images/random.png"
+        }
+     },
+     {
+        id:5,
+        icon: Brain,
+        habitVerifier: "Headspace",
+        title: "Find Your Inner Calm!",
+        subtitle: "Complete one Headspace session daily for a mindful reset.",
+        totalStakers: 10,
+        verificationType: "api",
+        verificationDetails: {
+            apiUrl: "/api/verify/headspace/",
+            params: ["username"],
+            frequency: "daily"
+        },
+        nft: {
+            id: "5",
+            name: "Mindfulness NFT",
+            description: "A NFT for mindfulness enthusiasts",
+            image: "/images/random.png"
+        }
+     }
   ]
-
-
-//   {
-// 	"id": 1 // for react listing
-//   "habitId": "unique_habit_id",
-//   "heading": "Become a Better Developer!",
-//   "subheading": "One GitHub commit everyday"
-//   "icon": "Book"// "Book", "Dumbbell" etc
-//   "totalStakers": 15 // Number of people commited to habit. ToDO: increment on habit creation and decrement on habit completion/failure
-//   "verificationType": "api", // Options: 'api', 'manual', 'none'
-//   "verificationDetails": {
-//     "apiUrl": "/api/verify/github/{username}",//nextjs verification endpoint
-//     "params": ["username"], // Additional parameters needed for the API
-//     "frequency": "daily" // Could also be 'weekly', 'custom'. Let it be daily for now
-//   },
-//   "createdAt": "timestamp"
-// }
