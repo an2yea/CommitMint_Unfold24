@@ -11,7 +11,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   }
 
   const body = await req.json() as CreateHabitContractRequest;
-  const { userId, habitId, habitVerifier, username, days, freePasses, stake, title, subtitle } = body;
+  const { userId, habitId, habitVerifier, username, days, freePasses, stake, title, subtitle, nft } = body;
 
   if (!userId || !habitId || !habitVerifier || !username || !days || !freePasses || !stake) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -42,6 +42,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     habitId: parseInt(habitId),
     totalStakers: 0,
     dailyCheckin: false,
+    nft: nft,
   };
 
   console.log('Creating habit contract:', habitContract);
@@ -56,7 +57,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     if (userDoc.exists()) {
       await updateDoc(userDocRef, {
         habitContracts: arrayUnion(habitContractId),
-        stakedAmount: Number(userDoc.data().stakedAmount) + habitContract.stakedAmount
+        stakedAmount: Number(userDoc.data().stakedAmount) + habitContract.stakedAmount,
+        tokenBalance: Number(userDoc.data().tokenBalance) - habitContract.stakedAmount
       });
     } else {
       console.error('User not found:', userId);
