@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { Check, X, AlertTriangle, DollarSign, Flame, Ticket, PlayCircle, CheckCircle2, XCircle } from 'lucide-react'
+import { Check, X, AlertTriangle, Coins, Flame, Ticket, PlayCircle, CheckCircle2, XCircle } from 'lucide-react'
 import { FetchedHabitContract } from '@/types/fetchedHabitContract'
 import { Congratulations } from './Congratulations'
 import { Failure } from './Failure'
@@ -93,7 +93,7 @@ export function YourHabitCard({ habit, onCheckIn }: YourHabitCardProps) {
           <CardContent>
             <div className="flex justify-between items-center mb-2">
               <span className="text-lg font-semibold flex items-center">
-                <DollarSign className="w-5 h-5 mr-1" />
+                <Coins className="w-5 h-5 mr-1" />
                 {habit.stakedAmount}
               </span>
               <span className="text-sm text-muted-foreground flex items-center">

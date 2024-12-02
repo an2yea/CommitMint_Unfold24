@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Trophy, DollarSign, X } from 'lucide-react'
+import { X } from 'lucide-react'
 
 interface FailureProps {
   isOpen: boolean
