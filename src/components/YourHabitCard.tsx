@@ -141,7 +141,7 @@ export function YourHabitCard({ habit, onCheckIn }: YourHabitCardProps) {
               <span className="font-medium">Free Passes Left:</span>
               <span className="flex items-center">
                 <Ticket className="w-4 h-4 mr-1" />
-                {habit.freePassesAllowed - habit.usedPasses}
+                {habit.freePassesAllowed - habit.usedPasses} / {habit.freePassesAllowed}
               </span>
             </div>
             {!habit.dailyCheckin && !checkInSuccess && !checkInFailed && (
