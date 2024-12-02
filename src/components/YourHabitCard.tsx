@@ -6,17 +6,18 @@ import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Check, X, AlertTriangle, DollarSign, Flame, Ticket, PlayCircle, CheckCircle2, XCircle } from 'lucide-react'
-import { HabitContract } from '@/types/habit_contract';
+import { FetchedHabitContract } from '@/types/fetchedHabitContract'
 
 interface YourHabitCardProps {
-  habit: HabitContract;
-  onCheckIn: (contractId: string, habitVerifier: string, username: string) => Promise<void>;
+  habit: FetchedHabitContract;
+  onCheckIn: (contractId: string, habitVerifier: string, username: string) => Promise<Boolean>;
 }
 
 export function YourHabitCard({ habit, onCheckIn }: YourHabitCardProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [isChecking, setIsChecking] = useState(false)
+  const [isCheckinLoading, setIsCheckinLoading] = useState(false)
   const [checkInSuccess, setCheckInSuccess] = useState(false)
+  const [checkInFailed, setCheckInFailed] = useState(false)
 
   const progress = (habit.progress.streak / habit.duration) * 100
   const statusIcon = {
@@ -26,14 +27,23 @@ export function YourHabitCard({ habit, onCheckIn }: YourHabitCardProps) {
   }
 
   const handleCheckIn = async () => {
-    setIsChecking(true)
+    setIsCheckinLoading(true)
     try {
-      await onCheckIn(habit.contractId, habit.habitVerifier, habit.username)
-      setCheckInSuccess(true)
+      const success = await onCheckIn(habit.id, habit.habitVerifier, habit.username)
+      console.log('Check-in success:', success)
+      if (!success) {
+        setCheckInFailed(true)
+        setTimeout(() => setCheckInFailed(false), 5000)
+      }
+      else {
+        setCheckInSuccess(true)
+      }
     } catch (error) {
-      console.error('Check-in failed:', error)
+      console.log('Check-in failed:', error)
+      setCheckInFailed(true)
+      setTimeout(() => setCheckInFailed(false), 5000)
     } finally {
-      setIsChecking(false)
+      setIsCheckinLoading(false)
     }
   }
 
@@ -123,9 +133,9 @@ export function YourHabitCard({ habit, onCheckIn }: YourHabitCardProps) {
                 {habit.freePassesAllowed - habit.usedPasses}
               </span>
             </div>
-            {!habit.dailyCheckin && !checkInSuccess && (
-              <Button onClick={handleCheckIn} disabled={isChecking} className="w-full">
-                {isChecking ? 'Verifying...' : 'Check-in Daily Activity'}
+            {!habit.dailyCheckin && !checkInSuccess && !checkInFailed && (
+              <Button onClick={handleCheckIn} disabled={isCheckinLoading} className="w-full">
+                {isCheckinLoading ? 'Verifying...' : 'Check-in Daily Activity'}
               </Button>
             )}
             {(habit.dailyCheckin || checkInSuccess) && (
@@ -139,6 +149,17 @@ export function YourHabitCard({ habit, onCheckIn }: YourHabitCardProps) {
                   <span>Daily check-in completed!</span>
                 </motion.div>
             )}
+            {(checkInFailed) && (
+              <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="bg-primary/10 text-primary p-3 rounded-md flex items-center justify-center"
+            >
+              <X className="w-5 h-5 mr-2" />
+              <span>Daily check-in failed! Failed to verify your activity, please try again!</span>
+            </motion.div>
+            ) }
           </div>
         </DialogContent>
       </Dialog>

@@ -1,51 +1,57 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TabsContent } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { YourHabitCard } from "./YourHabitCard";
 import { EmptyHabitsCTA } from './EmptyHabitsCTA';
-import { HabitContract } from '@/types/habit_contract';
-import { User } from '@/types';
+import { FetchedHabitContract } from '@/types/fetchedHabitContract';
+import { useDashboardContext } from '@/context/DashboardContext';
 
-interface YourHabitsProps {
-  user: User;
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
-}
+const YourHabits = () => {
 
-const YourHabits = ({ user, activeTab, setActiveTab }: YourHabitsProps) => {
-
+  const {user, shouldFetchHabits, activeTab, setActiveTab, setShouldFetchHabits } = useDashboardContext();
   const [statusFilter, setStatusFilter] = useState<string>('All')
-  const [habits, setHabits] = useState<HabitContract[]>([])
+  const [habits, setHabits] = useState<FetchedHabitContract[]>([])
   const [error, setError] = useState<string | null>(null); // To handle errors
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
     // Fetch habits from the API endpoint
-    useEffect(() => {
-      const fetchHabits = async () => {
-        if (!user?.uid) return;
-    
-        setIsLoading(true);
-        setError(null);
-    
-        try {
-          const response = await fetch(`/api/habitcontracts/get/${user.uid}`);
-    
-          if (!response.ok) {
-            throw new Error('Failed to fetch habits');
-          }
-    
-          const data = await response.json();
-          console.log("Habits are", data)
-          setHabits(data || []); // Assuming the API returns habits in a "habits" array
-        } catch (err) {
-          setError((err as Error).message);
-        } finally {
-          setIsLoading(false);
+    const fetchHabits = async () => {
+      if (!user?.uid) return;
+ 
+      setIsLoading(true);
+      setError(null);
+ 
+      try {
+        console.log("Fetching habits for user", user.uid)
+        const response = await fetch(`/api/habitcontracts/get/${user.uid}`);
+ 
+        if (!response.ok) {
+          throw new Error('Failed to fetch habits');
         }
-      };
-      fetchHabits();
-    }, [user?.uid, activeTab]);
+ 
+        const data = await response.json();
+        console.log("Habits are", data)
+        setHabits(data || []); // Assuming the API returns habits in a "habits" array
+      } catch (err) {
+        setError((err as Error).message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    useEffect(() => {
+      console.log("YourHabits useEffect triggered")
+      if (user?.uid && (shouldFetchHabits || !habits.length)) {
+        console.log("Fetching habits for user", user.uid, "shouldFetchHabits:", shouldFetchHabits)
+        fetchHabits();
+        if (shouldFetchHabits) {
+          setShouldFetchHabits(false);
+        }
+      }
+    }, [user?.uid, shouldFetchHabits]); // Depend on both user.uid and shouldFetchHabits
+
+
 
   // Filter habits based on status
   useEffect(() => {
@@ -56,14 +62,14 @@ const YourHabits = ({ user, activeTab, setActiveTab }: YourHabitsProps) => {
     }
   }, [statusFilter]);
 
-  const handleCheckIn = async (contractId: string, habitVerifier: string, username: string) => {
+  const handleCheckIn = async (habitContractId: string, habitVerifier: string, username: string) => {
   try {
     const response = await fetch(`/api/verify/${habitVerifier}/${username}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ contractId, username }),
+      body: JSON.stringify({ habitContractId}),
     });
 
     const data = await response.json();
@@ -73,24 +79,23 @@ const YourHabits = ({ user, activeTab, setActiveTab }: YourHabitsProps) => {
       if(data.doneToday) {
         console.log('Habit verified successfully');
         setHabits(habits.map(habit => 
-          habit.contractId === contractId ? { ...habit, dailyCheckin: true } : habit
+          habit.id === habitContractId ? { ...habit, dailyCheckin: true } : habit
         ));
+        return true;
       }
       else{
         console.log('Habit not verified');
       }
-
     } else {
       console.log('Error verifying habit:', data.error);
     }
+    return false;
   } catch (err) {
     console.log('Error making verify API call:', err);
+    return false;
   }
 };
 
-  const handleStartNow = () => {
-    setActiveTab("browse-habits")
-  }
 
   return (
     <TabsContent value="your-habits">
@@ -104,7 +109,7 @@ const YourHabits = ({ user, activeTab, setActiveTab }: YourHabitsProps) => {
                 <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
               </div>
             ) : habits.length === 0 ? (
-              <EmptyHabitsCTA onStartNow={handleStartNow} />
+              <EmptyHabitsCTA />
             ) : (
               <>
                   <div className="mb-4">
@@ -124,13 +129,13 @@ const YourHabits = ({ user, activeTab, setActiveTab }: YourHabitsProps) => {
                 <AnimatePresence>
                   {Array.isArray(habits) && habits.map((habit, index) => (
                     <motion.div
-                      key={habit.contractId}
+                      key={habit.id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -20 }}
                       transition={{ duration: 0.5, delay: index * 0.1 }}
                     >
-                      <YourHabitCard key={habit.contractId} habit={habit as HabitContract} onCheckIn={handleCheckIn} />
+                      <YourHabitCard key={habit.id} habit={habit} onCheckIn={handleCheckIn} />
                     </motion.div>
                   ))}
                 </AnimatePresence>

@@ -1,12 +1,13 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // Adjust imports as necessary
 import { DollarSign } from 'lucide-react'; // Ensure this import is correct
+import { useDashboardContext } from '@/context/DashboardContext';
 
-interface TotalStakedProps {
-  totalStaked: number;
-}
 
-const TotalStaked = ({ totalStaked }: TotalStakedProps) => {
+const TotalStaked = () => {
+  const { shouldFetchHabits, user } = useDashboardContext();
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -20,7 +21,7 @@ const TotalStaked = ({ totalStaked }: TotalStakedProps) => {
         <CardContent>
           <p className="text-4xl font-bold flex items-center">
             <DollarSign className="mr-2" />
-            {totalStaked.toFixed(2)}
+            {user?.stakedAmount}
           </p>
         </CardContent>
       </Card>

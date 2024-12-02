@@ -1,4 +1,4 @@
-import { collection, getDocs, DocumentData, query, where } from 'firebase/firestore';
+import { collection, doc, getDoc } from 'firebase/firestore';
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/config/firebase';
 import { getUserById } from '../../../users/[userId]/route';
@@ -17,18 +17,19 @@ export async function GET(
 
   try {
     const userData = await getUserById(userId) as User;
-    const habitContracts: (HabitContract & { id: string })[] = [];
+    const habitContracts: ({ id: string } & HabitContract)[] = [];
 
 
     if (userData.habitContracts && userData.habitContracts.length > 0) {
       const habitContractsRef = collection(db, 'habitContracts');
-      const habitContractsSnapshot = await getDocs(habitContractsRef);
-      habitContractsSnapshot.forEach((doc) => {
-        const habitContractData = doc.data();
-        if (userData.habitContracts.includes(habitContractData.contractId)) {
-          habitContracts.push({ id: doc.id, ...habitContractData as HabitContract });
+      for (const habitId of userData.habitContracts) {
+        const habitDocRef = doc(habitContractsRef, habitId);
+        const habitDocSnapshot = await getDoc(habitDocRef);
+        if (habitDocSnapshot.exists()) {
+          const habitContractData = habitDocSnapshot.data() as HabitContract;
+          habitContracts.push({ id: habitDocSnapshot.id, ...habitContractData });
         }
-      });
+      }
     }
 
 

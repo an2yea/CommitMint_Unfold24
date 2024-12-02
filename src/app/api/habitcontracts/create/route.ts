@@ -1,10 +1,9 @@
 import { collection, addDoc, Timestamp, doc, getDoc, updateDoc, arrayUnion } from 'firebase/firestore';
-import { v4 as uuidv4 } from 'uuid';
 import { format } from 'date-fns';
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/config/firebase';
 import { HabitContract } from '@/types';
-import CreateHabitContractRequest from '@/types/create_habit_request';
+import CreateHabitContractRequest from '@/types/createHabitRequest';
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   if (req.method !== 'POST') {
@@ -18,12 +17,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
   }
 
-  const contractId = uuidv4();
   const startDate = format(new Date(), 'yyyy-MM-dd');
   const endDate = format(new Date(Date.now() + days * 24 * 60 * 60 * 1000), 'yyyy-MM-dd');
-
+  
   const habitContract: HabitContract = {
-    contractId,
     userId,
     habitVerifier: habitVerifier,
     username,
@@ -32,7 +29,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     duration: days,
     freePassesAllowed: freePasses,
     usedPasses: 0,
-    stakedAmount: stake,
+    stakedAmount: Number(stake),
     progress: {
       streak: 0,
       days: {},
@@ -50,14 +47,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   console.log('Creating habit contract:', habitContract);
 
   try {
-    await addDoc(collection(db, 'habitContracts'), habitContract);
+    const habitContractRef = await addDoc(collection(db, 'habitContracts'), habitContract);
+    const habitContractId = habitContractRef.id;
 
     const userDocRef = doc(db, 'users', userId);
     const userDoc = await getDoc(userDocRef);
 
     if (userDoc.exists()) {
       await updateDoc(userDocRef, {
-        habitContracts: arrayUnion(contractId)
+        habitContracts: arrayUnion(habitContractId),
+        stakedAmount: Number(userDoc.data().stakedAmount) + habitContract.stakedAmount
       });
     } else {
       console.error('User not found:', userId);

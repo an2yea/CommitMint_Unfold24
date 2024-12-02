@@ -5,9 +5,9 @@ interface DayProgress {
   usedPasses?: number;
 }
 
-interface HabitContract {
-  contractId: string;
+interface FetchedHabitContract {
   userId: string;
+  id: string;
   habitId: number;
   habitVerifier: string;
   username: string;
@@ -32,4 +32,4 @@ interface HabitContract {
   lastVerifiedDate: string;
 }
 
-export type { HabitContract };
+export type { FetchedHabitContract };

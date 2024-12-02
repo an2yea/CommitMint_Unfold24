@@ -4,34 +4,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from 'framer-motion';
 import { TabsContent } from "@/components/ui/tabs";
 import { Users } from 'lucide-react';
-import { LucideIcon } from 'lucide-react';
 import type { HabitType } from "@/types";
+import { useDashboardContext } from '@/context/DashboardContext';
+import { browseHabits } from '@/lib/habitdata';
 
-// Add interface for component props
-interface BrowseHabitsProps {
-  habits: HabitType[];
-  selectedHabit: HabitType | null;
-  setSelectedHabit: (habit: HabitType | null) => void;
-  isCreatingHabit: boolean;
-  setIsCreatingHabit: (isCreating: boolean) => void;
-  onHabitCreationComplete: () => void;
-}
 
-const BrowseHabits = ({ 
-  habits, 
-  selectedHabit, 
-  setSelectedHabit, 
-  isCreatingHabit, 
-  setIsCreatingHabit, 
-  onHabitCreationComplete 
-}: BrowseHabitsProps) => {
+
+const BrowseHabits = () => {
+  const { setSelectedHabit } = useDashboardContext();
+
   const handleCardClick = (habit: HabitType) => {
     setSelectedHabit(habit); // Update state outside the rendering flow
   };
 
-  const handleDialogClose = () => {
-    setSelectedHabit(null); // Close the dialog when required
-  };
 
   return (
     <TabsContent value="browse-habits">
@@ -41,7 +26,7 @@ const BrowseHabits = ({
         transition={{ delay: 0.4, duration: 0.5 }}
       >
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {habits.map((habit, index) => (
+          {browseHabits.map((habit, index) => (
             <Dialog key={habit.id}>
               <DialogTrigger asChild>
                 <motion.div

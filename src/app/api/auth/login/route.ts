@@ -27,8 +27,8 @@ export async function POST(request: Request): Promise<NextResponse> {
         username: userData.displayName ?? '',
         uid: userData.uid,
         created_at: new Date().toISOString(),
-        habits: [],
-        staked_amount: 0.00,
+        habitContracts: [],
+        stakedAmount: 0.00,
         avatar: userData.photoURL ?? ''
       };
       
