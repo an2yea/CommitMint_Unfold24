@@ -16,12 +16,11 @@ import { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription, Toas
 import { useDashboardContext, DashboardProvider } from '@/context/DashboardContext';
 
 function DashboardContent() {
-  const { shouldFetchHabits,user, activeTab, setActiveTab, setUser } = useDashboardContext();
+  const { shouldFetchHabits,user, activeTab, error, setActiveTab, setUser, setError } = useDashboardContext();
   const [firebaseUser, setFirebaseUser] = useState<any | null>(null);
   const router = useRouter();
 
   const [mounted, setMounted] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -61,8 +60,8 @@ function DashboardContent() {
         const data = await response.json();
         console.log("User is", data)
         setUser(data);         
-      } catch (err) {
-        setError((err as Error).message);
+      } catch (err : any) {
+        setError(err?.message);
       } finally {
       }
     };
@@ -74,8 +73,8 @@ function DashboardContent() {
       await auth.signOut();
       await fetch('/api/auth/logout', { method: 'POST' });
       router.push('/login');
-    } catch (error) {
-      console.error('Logout error:', error);
+    } catch (error:any) {
+      setError(`Failed to sign out: ${error?.message}`);
     }
   };
 

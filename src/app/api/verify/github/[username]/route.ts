@@ -30,7 +30,7 @@ export async function POST(
     });
 
     if (!response.ok) {
-      throw new Error('Failed to fetch GitHub events');
+      return NextResponse.json({ error: 'Failed to fetch github events' }, { status: 500 });
     }
 
     const events: GitHubEvent[] = await response.json();
@@ -40,7 +40,7 @@ export async function POST(
       }
       return false;
     });
-
+    let habitCompleted = false;
     if (doneToday) {
       const contractRef = doc(db, 'habitContracts', habitContractId);
       const contractSnap = await getDoc(contractRef);
@@ -53,16 +53,39 @@ export async function POST(
           [today]: { verified: true }
         };
 
-        await updateDoc(contractRef, {
-          'progress.streak': updatedStreak,
-          'progress.days': updatedDays,
-          dailyCheckin: true,
-          lastVerifiedDate: today
-        });
+        if (contract.duration === updatedStreak) {
+          await updateDoc(contractRef, {
+            'progress.streak': updatedStreak,
+            'progress.days': updatedDays,
+            dailyCheckin: true,
+            lastVerifiedDate: today,
+            status: 'Completed'
+          });
+          habitCompleted = true;
+
+          // Reduce the user's stakedAmount by contract.stakeAmount
+          const userRef = doc(db, 'users', contract.userId);
+          const userSnap = await getDoc(userRef);
+          if (userSnap.exists()) {
+            const user = userSnap.data();
+            const updatedStakedAmount = user.stakedAmount - contract.stakeAmount;
+            await updateDoc(userRef, {
+              stakedAmount: updatedStakedAmount
+            });
+          }
+        }
+        else {
+          await updateDoc(contractRef, {
+            'progress.streak': updatedStreak,
+            'progress.days': updatedDays,
+            dailyCheckin: true,
+            lastVerifiedDate: today
+          });
+        }
       }
     }
 
-    return NextResponse.json({ doneToday });
+    return NextResponse.json({ doneToday, habitCompleted });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: 'Failed to verify commit' }, { status: 500 });

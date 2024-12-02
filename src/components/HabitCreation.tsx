@@ -9,7 +9,6 @@ import { Check, ChevronRight, Calendar, Ticket, DollarSign, User, Loader2 } from
 import type { HabitType } from '@/types'
 import { useDashboardContext } from '@/context/DashboardContext';
 
-
 interface FormData {
   days: number
   freePasses: number
@@ -124,18 +123,17 @@ export function HabitCreationFlow() {
 
       if (!response.ok) {
         setError('Failed to create habit contract. Please try again.');
-
         setTimeout(() => {
           handleDialogClose()
         }, 3000)
-        throw new Error('Failed to create habit contract');
+        // throw new Error('Failed to create habit contract');
       }
     } catch (error) {
       setError('Failed to create habit contract. Please try again.');
       setTimeout(() => {
         handleDialogClose()
       }, 3000)
-      throw new Error('Failed to create habit contract');
+      //throw new Error('Failed to create habit contract');
     }
   }
 
