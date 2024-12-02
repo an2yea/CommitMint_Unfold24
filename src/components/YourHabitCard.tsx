@@ -7,10 +7,16 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Check, X, AlertTriangle, DollarSign, Flame, Ticket, PlayCircle, CheckCircle2, XCircle } from 'lucide-react'
 import { FetchedHabitContract } from '@/types/fetchedHabitContract'
+import { Congratulations } from './Congratulations'
 
 interface YourHabitCardProps {
   habit: FetchedHabitContract;
-  onCheckIn: (contractId: string, habitVerifier: string, username: string) => Promise<Boolean>;
+  onCheckIn: (contractId: string, habitVerifier: string, username: string) => Promise<OnCheckInReturnType>;
+}
+
+interface OnCheckInReturnType {
+  doneToday : boolean;
+  habitCompleted : boolean;
 }
 
 export function YourHabitCard({ habit, onCheckIn }: YourHabitCardProps) {
@@ -18,6 +24,7 @@ export function YourHabitCard({ habit, onCheckIn }: YourHabitCardProps) {
   const [isCheckinLoading, setIsCheckinLoading] = useState(false)
   const [checkInSuccess, setCheckInSuccess] = useState(false)
   const [checkInFailed, setCheckInFailed] = useState(false)
+  const [showCongratulations, setShowCongratulations] = useState<boolean>(false);
 
   const progress = (habit.progress.streak / habit.duration) * 100
   const statusIcon = {
@@ -29,14 +36,18 @@ export function YourHabitCard({ habit, onCheckIn }: YourHabitCardProps) {
   const handleCheckIn = async () => {
     setIsCheckinLoading(true)
     try {
-      const success = await onCheckIn(habit.id, habit.habitVerifier, habit.username)
-      console.log('Check-in success:', success)
-      if (!success) {
+      const {doneToday, habitCompleted} = await onCheckIn(habit.id, habit.habitVerifier, habit.username)
+      console.log('Check-in success:', doneToday)
+      if (!doneToday) {
         setCheckInFailed(true)
         setTimeout(() => setCheckInFailed(false), 5000)
       }
       else {
         setCheckInSuccess(true)
+        if(habitCompleted){
+          setShowCongratulations(true);
+          setIsDialogOpen(false);
+        }
       }
     } catch (error) {
       console.log('Check-in failed:', error)
@@ -163,6 +174,12 @@ export function YourHabitCard({ habit, onCheckIn }: YourHabitCardProps) {
           </div>
         </DialogContent>
       </Dialog>
+      <Congratulations
+          isOpen={showCongratulations}
+          onClose={() => setShowCongratulations(false)}
+          habitTitle={habit.title}
+          reward={habit.stakedAmount}
+        />
     </>
   )
 }

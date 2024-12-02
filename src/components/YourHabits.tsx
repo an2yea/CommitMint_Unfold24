@@ -9,10 +9,10 @@ import { useDashboardContext } from '@/context/DashboardContext';
 
 const YourHabits = () => {
 
-  const {user, shouldFetchHabits, activeTab, setActiveTab, setShouldFetchHabits } = useDashboardContext();
+  const {user, shouldFetchHabits, setShouldFetchHabits, setError } = useDashboardContext();
   const [statusFilter, setStatusFilter] = useState<string>('All')
   const [habits, setHabits] = useState<FetchedHabitContract[]>([])
-  const [error, setError] = useState<string | null>(null); // To handle errors
+  const [fetchedHabits, setFetchedHabits] = useState<FetchedHabitContract[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
     // Fetch habits from the API endpoint
@@ -27,14 +27,16 @@ const YourHabits = () => {
         const response = await fetch(`/api/habitcontracts/get/${user.uid}`);
  
         if (!response.ok) {
-          throw new Error('Failed to fetch habits');
+          // throw new Error('Failed to fetch habits');
+          setError('Failed to fetch habits');
         }
  
         const data = await response.json();
         console.log("Habits are", data)
         setHabits(data || []); // Assuming the API returns habits in a "habits" array
-      } catch (err) {
-        setError((err as Error).message);
+        setFetchedHabits(data || []);
+      } catch (err : any) {
+        setError(err?.message);
       } finally {
         setIsLoading(false);
       }
@@ -56,9 +58,9 @@ const YourHabits = () => {
   // Filter habits based on status
   useEffect(() => {
     if (statusFilter === 'All') {
-      setHabits((prev) => prev); // No filtering, show all habits
+      setHabits(fetchedHabits); // No filtering, show all habits
     } else {
-      setHabits((prev) => prev.filter(habit => habit.status === statusFilter));
+      setHabits(fetchedHabits?.filter(habit => habit.status === statusFilter));
     }
   }, [statusFilter]);
 
@@ -79,9 +81,31 @@ const YourHabits = () => {
       if(data.doneToday) {
         console.log('Habit verified successfully');
         setHabits(habits.map(habit => 
-          habit.id === habitContractId ? { ...habit, dailyCheckin: true } : habit
+          habit.id === habitContractId ? { 
+            ...habit, 
+            dailyCheckin: true,
+            status: data.habitCompleted ? 'Completed' : 'Active', 
+            progress: { 
+              ...habit.progress, 
+              streak: habit.progress.streak + 1 
+            } 
+          } : habit
         ));
-        return true;
+        setFetchedHabits(fetchedHabits.map(habit => 
+          habit.id === habitContractId ? { 
+            ...habit, 
+            dailyCheckin: true, 
+            status: data.habitCompleted ? 'Completed' : 'Active', 
+            progress: { 
+              ...habit.progress, 
+              streak: habit.progress.streak + 1 
+            } 
+          } : habit
+        ));
+        if(data.habitCompleted){
+          console.log('Habit completed successfully');
+        }
+        return {doneToday: data.doneToday, habitCompleted: data.habitCompleted};
       }
       else{
         console.log('Habit not verified');
@@ -89,10 +113,10 @@ const YourHabits = () => {
     } else {
       console.log('Error verifying habit:', data.error);
     }
-    return false;
+    return {doneToday: false, habitCompleted: false};
   } catch (err) {
     console.log('Error making verify API call:', err);
-    return false;
+    return {doneToday: false, habitCompleted: false};
   }
 };
 
@@ -108,7 +132,7 @@ const YourHabits = () => {
               <div className="flex items-center justify-center h-64">
                 <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
               </div>
-            ) : habits.length === 0 ? (
+            ) : fetchedHabits.length === 0 ? (
               <EmptyHabitsCTA />
             ) : (
               <>

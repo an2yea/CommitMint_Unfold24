@@ -4,14 +4,14 @@ import { db } from '@/config/firebase';
 
 export async function getUserById(userId: string): Promise<DocumentData> {
   if (!userId) {
-    throw new Error('Missing userId');
+    return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
   }
 
   const userDocRef = doc(db, 'users', userId);
   const userDoc = await getDoc(userDocRef);
 
   if (!userDoc.exists()) {
-    throw new Error('User not found', { cause: 404 });
+    return NextResponse.json({ error: 'User not found' }, { status: 404 });
   }
   return userDoc.data();
 }
